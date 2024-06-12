@@ -1,0 +1,69 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tyk-dp-redis
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: redis-cluster
+    targetRevision: v10.0.1
+    helm:
+      releaseName: tyk-redis
+      values: |
+        password: "topsecretpassword"
+        redis:
+          resourcesPreset: "none"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tyk-dp
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tyk-dp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.tyk.io/public/helm/charts
+    chart: tyk-data-plane
+    targetRevision: v1.4.0
+    helm:
+      releaseName: tyk-dp
+      values: |
+        global:
+          secrets:
+            useSecretName: "tyk-dp-conf"
+          remoteControlPlane:
+            useSecretName: "tyk-dp-conf"
+            connectionString: "mdcb-svc-tyk-cp-tyk-mdcb.tyk-cp.svc:9091"
+            useSSL: false
+            sslInsecureSkipVerify: true
+          redis:
+            addrs:
+            - "tyk-redis-redis-cluster.tyk-dp.svc:6379"
+            pass: "topsecretpassword"
+            enableCluster: true
+        tyk-gateway:
+          gateway:
+            opentelemetry:
+              enabled: "true"
+              endpoint: "tyk-otel-collector-opentelemetry-collector.tyk.svc:4317"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tyk-dp
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

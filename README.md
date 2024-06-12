@@ -52,12 +52,20 @@ kubectl apply -f apps/observability
 
 ### Tyk
 
+Choose between single cluster all-in-one deployment model or distributed deployment model.
+
+#### Tyk (Single cluster all-in-one deployment)
+
+Make sure you have the Tyk Dashboard license key ready and replace "<REPLACE_WITH_DASH_LICENSE>" with it in the command below.
+
 Create secret with Tyk credentials:
 ```
+kubectl create namespace tyk
+
 kubectl create secret generic tyk-conf --namespace=tyk \
    --from-literal=APISecret=CHANGEME \
    --from-literal=AdminSecret=12345 \
-   --from-literal=DashLicense=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbGxvd2VkX25vZGVzIjoiNzRkM2I5NmYtZjFmYS00ZGFjLTQ4NzUtZDc2ZGRkMWVkMDRiLDA3NjQ4NGNiLTFhYWYtNDZhOS01NTZmLTgyNTdhMWY4YzRkMSw0NmRhNjdkNC03MzVjLTRmMTktNzM4MC1lYzAxM2RkMTQ4MjAsZjhkMGIxOTctYzliNi00MTk1LTUyOWItNzc5MjY0Y2ViZTI5LDI2NmNlMjJiLTg2ZWItNDQ3Ni03NmZhLWNjZjQxY2RkMTI3MCxlYTQ4YjQ0ZS1kYTAwLTQwYTMtNTBlYy02YzZkNjc4NjZjY2IsODRkZjg4ZTAtZTY0ZC00M2QxLTQzZDctNjdlOTAwYjY2NmFkLGViNzVlNTg5LWYwMWEtNGViNy03NWM3LTE4ZWFlYTZkMjc0MSwwZTcwMjc2My1mNjllLTQ4YjYtNDhjMy1lNDFiN2ZlZDBjMDgsYWQ0OWQ1N2ItODg0Zi00ZGJmLTVhN2MtNWE4ZDg2Y2M2ZGE0IiwiZXhwIjoxNzE4MzIzMTk5LCJpYXQiOjE3MTU3MDEzMTQsIm93bmVyIjoiNjFjY2U2MmMxMjFjYTEwMDAxOGJiMTkwIiwic2NvcGUiOiJtdWx0aV90ZWFtLHJiYWMsZ3JhcGgsZmVkZXJhdGlvbiIsInYiOiIyIn0.uASWAZPQLDApZ6Ae1kY53hBVpivAxgz9dy5PMbnj1qUnH0Da1rlUOHFHV5LSWH4eu1a1uttlJAShafVUIrWewFesPJJHKZrv2aPBKE8Zt7z48ZMfI0ctq-DWyFB9JrMtBqgu0hkFYoHHjWhQzrWUgIuwypbSNYD_XrcKw1bwu6tcudxubttkH0I2j1JX5B3_hDQAKIFQ3gw8bIVqziUmpQR2nR3q2tZ2u8ZK6vrdIyn3PFl5715dYq4ZWw5Uad33L9NtTGzgFMMzcT-mhbpZX22lYmqsrJQNrQbIJW7p6K0cy-iWwO5py8ppkqnTfFbmDC691dZXNUx1eyCUQ5jmAQ
+   --from-literal=DashLicense=<REPLACE_WITH_DASH_LICENSE>
 ```
 
 Install Tyk using ArgoCD Application CRDs
@@ -66,14 +74,93 @@ Install Tyk using ArgoCD Application CRDs
 kubectl apply -f apps/tyk.yaml
 ```
 
-You can expose the Tyk Gateway to your localhost using the following command:
+You can expose the Tyk Dashboard and Gateway to your localhost using the following command:
+
 ```
 kubectl port-forward svc/gateway-svc-tyk-gateway --namespace tyk 8080 &
+```
+
+```
+kubectl port-forward svc/dashboard-svc-tyk-gateway-tyk-dashboard --namespace tyk 3000 &
 ```
 
 You can check the state of the Tyk gateway using the following `curl` command:
 ```
 curl localhost:8080/hello
+```
+
+You can access Tyk Dashboard here:
+```
+http://localhost:3000
+```
+
+Default admin login is "default@example.com" / "topsecretpassword". It can be changed in the ArgoCD app manifest.
+
+#### Tyk (Distributed deployment)
+
+Make sure you have the Tyk Dashboard and MDCB license keys ready and replace "<REPLACE_WITH_DASH_LICENSE>" and "<REPLACE_WITH_MDCB_LICENSE>" with your actual keys in the command below.
+
+First, install Tyk control plane.
+
+Create secret with Tyk credentials:
+```
+kubectl create namespace tyk-cp
+
+kubectl create secret generic tyk-cp-conf --namespace=tyk-cp \
+   --from-literal=APISecret=CHANGEME \
+   --from-literal=AdminSecret=12345 \
+   --from-literal=DashLicense=<REPLACE_WITH_DASH_LICENSE> \
+   --from-literal=MDCBLicense=<REPLACE_WITH_MDCB_LICENSE>
+```
+
+Install Tyk using ArgoCD Application CRDs
+
+```
+kubectl apply -f apps/tyk-control-plane.yaml
+```
+
+You can expose the Tyk Dashboard to your localhost using the following command:
+
+```
+kubectl port-forward svc/dashboard-svc-tyk-cp-tyk-dashboard --namespace tyk-cp 3001 &
+```
+
+You can access Tyk Dashboard here:
+```
+http://localhost:3001
+```
+
+Default admin login is "default@example.com" / "topsecretpassword". It can be changed in the ArgoCD app manifest.
+
+Next, install the Tyk data plane.
+
+Create secret with remote control plane credentials:
+```
+kubectl create namespace tyk-dp
+
+kubectl create secret generic tyk-dp-conf --namespace=tyk-dp \
+   --from-literal=APISecret=CHANGEME \
+   --from-literal=AdminSecret=12345 \
+   --from-literal=groupID=mygroup \
+   --from-literal=orgId=$(kubectl get secret tyk-operator-conf --namespace=tyk-cp -o jsonpath='{.data.TYK_ORG}' | base64 -d) \
+   --from-literal=userApiKey=$(kubectl get secret tyk-operator-conf --namespace=tyk-cp -o jsonpath='{.data.TYK_AUTH}' | base64 -d)
+```
+
+Install Tyk using ArgoCD Application CRDs
+
+```
+kubectl apply -f apps/tyk-data-plane.yaml
+```
+
+You can expose the Data Plane Tyk Gateway to your localhost using the following command:
+
+```
+kubectl port-forward svc/gateway-svc-tyk-gateway --namespace tyk 8081 &
+```
+
+You can check the state of the Tyk gateway using the following `curl` command:
+```
+curl localhost:8081/hello
 ```
 
 ### Tyk Operator
