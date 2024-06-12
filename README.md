@@ -1,7 +1,7 @@
 # Tyk K8S API Platform Teams Demo
-This repository will help you get started with Tyk OSS in kubernetes and allow 
-you to leverage OSS tools such as Keycloak and the Tyk Operator to manage your
-API authentication and authorization in k8s using OAuth2.0 
+This repository will help you get started with Tyk deployment in Kubernetes and allow 
+you to leverage OSS tools such as Prometheus, Jaeger for monitoring and Keycloak for
+managing API authentication and authorization in k8s using OAuth2.0
 
 ## Requirements
 1. [minikube](https://minikube.sigs.k8s.io/docs/start/)
@@ -32,7 +32,7 @@ You can expose ArgoCD UI using the following command:
 kubectl port-forward svc/argocd-server --namespace argocd 8443:443 &
 ```
 
-You can access the Keycloak instance in your browser at [localhost:8443](http://localhost:8443):
+You can access the ArgoCD instance in your browser at [localhost:8443](http://localhost:8443):
 ```
 Username: admin
 ```
@@ -49,7 +49,6 @@ Install observability tools using ArgoCD Application CRDs
 ```
 kubectl apply -f apps/observability
 ```
-
 
 ### Tyk
 
