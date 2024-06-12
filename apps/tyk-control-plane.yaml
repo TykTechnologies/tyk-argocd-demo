@@ -2,11 +2,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: tyk-redis
+  name: tyk-cp-redis
   namespace: argocd
-  finalizers:
-    # The default behaviour is foreground cascading deletion
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -21,7 +18,7 @@ spec:
           resourcesPreset: "none"
   destination:
     server: https://kubernetes.default.svc
-    namespace: tyk
+    namespace: tyk-cp
   syncPolicy:
     automated:
       prune: true
@@ -32,7 +29,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: tyk-postgres
+  name: tyk-cp-postgres
   namespace: argocd
 spec:
   project: default
@@ -48,7 +45,7 @@ spec:
           postgresPassword: "topsecretpassword"
   destination:
     server: https://kubernetes.default.svc
-    namespace: tyk
+    namespace: tyk-cp
   syncPolicy:
     automated:
       prune: true
@@ -59,48 +56,41 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: tyk
+  name: tyk-cp
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://helm.tyk.io/public/helm/charts
-    chart: tyk-stack
+    chart: tyk-control-plane
     targetRevision: v1.4.0
     helm:
-      releaseName: tyk-gateway
+      releaseName: tyk-cp
       values: |
         global:
           secrets:
-            useSecretName: "tyk-conf"
+            useSecretName: "tyk-cp-conf"
           adminUser: 
             email: "default@example.com"
             password: "topsecretpassword"
           storageType: "postgres"
           postgres:
-            host: "tyk-storage-postgres-postgresql.tyk.svc"
+            host: "tyk-storage-postgres-postgresql.tyk-cp.svc"
             port: 5432
             password: "topsecretpassword"
             database: "storage"
             sslmode: "disable"
           redis:
             addrs:
-            - "tyk-redis-redis-cluster.tyk.svc:6379"
+            - "tyk-redis-redis-cluster.tyk-cp.svc:6379"
             pass: "topsecretpassword"
             enableCluster: true
-        tyk-gateway:
-          gateway:
-            opentelemetry:
-              enabled: "true"
-              endpoint: "tyk-otel-collector-opentelemetry-collector:4317"
-        tyk-pump:
-          pump:
-            backend:
-            - postgres
-            - prometheus
+        tyk-mdcb:
+          mdcb:
+            useSecretName: "tyk-cp-conf"
   destination:
     server: https://kubernetes.default.svc
-    namespace: tyk
+    namespace: tyk-cp
   syncPolicy:
     automated:
       prune: true
