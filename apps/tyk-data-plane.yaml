@@ -13,14 +13,14 @@ spec:
     chart: redis-cluster
     targetRevision: v10.0.1
     helm:
-      releaseName: tyk-redis
+      releaseName: tyk-dp-redis
       values: |
         password: "topsecretpassword"
         redis:
           resourcesPreset: "none"
   destination:
     server: https://kubernetes.default.svc
-    namespace: tyk-dp
+    namespace: tyk
   syncPolicy:
     automated:
       prune: true
@@ -49,12 +49,12 @@ spec:
             useSecretName: "tyk-dp-conf"
           remoteControlPlane:
             useSecretName: "tyk-dp-conf"
-            connectionString: "mdcb-svc-tyk-cp-tyk-mdcb.tyk-cp.svc:9091"
+            connectionString: "mdcb-svc-tyk-cp-tyk-mdcb.tyk.svc:9091"
             useSSL: false
             sslInsecureSkipVerify: true
           redis:
             addrs:
-            - "tyk-redis-redis-cluster.tyk-dp.svc:6379"
+            - "tyk-dp-redis-redis-cluster.tyk.svc:6379"
             pass: "topsecretpassword"
             enableCluster: true
         tyk-gateway:
@@ -64,7 +64,7 @@ spec:
               endpoint: "tyk-otel-collector-opentelemetry-collector.tyk.svc:4317"
   destination:
     server: https://kubernetes.default.svc
-    namespace: tyk-dp
+    namespace: tyk
   syncPolicy:
     automated:
       prune: true

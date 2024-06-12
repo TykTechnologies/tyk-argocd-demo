@@ -106,11 +106,7 @@ First, install Tyk control plane.
 
 Create secret with Tyk credentials:
 ```
-kubectl create namespace tyk-cp
-```
-
-```
-kubectl create secret generic tyk-cp-conf --namespace=tyk-cp \
+kubectl create secret generic tyk-cp-conf --namespace=tyk \
    --from-literal=APISecret=CHANGEME \
    --from-literal=AdminSecret=12345 \
    --from-literal=DashLicense=<REPLACE_WITH_DASH_LICENSE> \
@@ -126,7 +122,7 @@ kubectl apply -f apps/tyk-control-plane.yaml
 You can expose the Tyk Dashboard to your localhost using the following command:
 
 ```
-kubectl port-forward svc/dashboard-svc-tyk-cp-tyk-dashboard --namespace tyk-cp 3001:3000 &
+kubectl port-forward svc/dashboard-svc-tyk-cp-tyk-dashboard --namespace tyk 3001:3000 &
 ```
 
 You can access Tyk Dashboard here:
@@ -140,16 +136,12 @@ Next, install the Tyk data plane.
 
 Create secret with remote control plane credentials:
 ```
-kubectl create namespace tyk-dp
-```
-
-```
-kubectl create secret generic tyk-dp-conf --namespace=tyk-dp \
+kubectl create secret generic tyk-dp-conf --namespace=tyk \
    --from-literal=APISecret=CHANGEME \
    --from-literal=AdminSecret=12345 \
    --from-literal=groupID=mygroup \
-   --from-literal=orgId=$(kubectl get secret tyk-operator-conf --namespace=tyk-cp -o jsonpath='{.data.TYK_ORG}' | base64 -d) \
-   --from-literal=userApiKey=$(kubectl get secret tyk-operator-conf --namespace=tyk-cp -o jsonpath='{.data.TYK_AUTH}' | base64 -d)
+   --from-literal=orgId=$(kubectl get secret tyk-operator-conf --namespace=tyk -o jsonpath='{.data.TYK_ORG}' | base64 -d) \
+   --from-literal=userApiKey=$(kubectl get secret tyk-operator-conf --namespace=tyk -o jsonpath='{.data.TYK_AUTH}' | base64 -d)
 ```
 
 Install Tyk using ArgoCD Application CRDs
@@ -161,7 +153,7 @@ kubectl apply -f apps/tyk-data-plane.yaml
 You can expose the Data Plane Tyk Gateway to your localhost using the following command:
 
 ```
-kubectl port-forward svc/gateway-svc-tyk-dp-tyk-gateway --namespace tyk-dp 8081:8080 &
+kubectl port-forward svc/gateway-svc-tyk-dp-tyk-gateway --namespace tyk 8081:8080 &
 ```
 
 You can check the state of the Tyk gateway using the following `curl` command:

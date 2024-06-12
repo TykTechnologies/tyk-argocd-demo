@@ -13,14 +13,14 @@ spec:
     chart: redis-cluster
     targetRevision: v10.0.1
     helm:
-      releaseName: tyk-redis
+      releaseName: tyk-cp-redis
       values: |
         password: "topsecretpassword"
         redis:
           resourcesPreset: "none"
   destination:
     server: https://kubernetes.default.svc
-    namespace: tyk-cp
+    namespace: tyk
   syncPolicy:
     automated:
       prune: true
@@ -42,14 +42,14 @@ spec:
     chart: postgresql
     targetRevision: v12.12.10
     helm:
-      releaseName: tyk-storage-postgres
+      releaseName: tyk-cp-storage-postgres
       values: |
         auth:
           database: "storage"
           postgresPassword: "topsecretpassword"
   destination:
     server: https://kubernetes.default.svc
-    namespace: tyk-cp
+    namespace: tyk
   syncPolicy:
     automated:
       prune: true
@@ -81,14 +81,14 @@ spec:
             password: "topsecretpassword"
           storageType: "postgres"
           postgres:
-            host: "tyk-storage-postgres-postgresql.tyk-cp.svc"
+            host: "tyk-cp-storage-postgres-postgresql.tyk.svc"
             port: 5432
             password: "topsecretpassword"
             database: "storage"
             sslmode: "disable"
           redis:
             addrs:
-            - "tyk-redis-redis-cluster.tyk-cp.svc:6379"
+            - "tyk-cp-redis-redis-cluster.tyk.svc:6379"
             pass: "topsecretpassword"
             enableCluster: true
         tyk-mdcb:
@@ -96,7 +96,7 @@ spec:
             useSecretName: "tyk-cp-conf"
   destination:
     server: https://kubernetes.default.svc
-    namespace: tyk-cp
+    namespace: tyk
   syncPolicy:
     automated:
       prune: true
