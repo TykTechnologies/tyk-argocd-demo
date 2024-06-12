@@ -4,6 +4,8 @@ kind: Application
 metadata:
   name: tyk-dp-redis
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -31,6 +33,8 @@ kind: Application
 metadata:
   name: tyk-dp
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:

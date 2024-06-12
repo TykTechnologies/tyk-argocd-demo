@@ -61,7 +61,9 @@ Make sure you have the Tyk Dashboard license key ready and replace "<REPLACE_WIT
 Create secret with Tyk credentials:
 ```
 kubectl create namespace tyk
+```
 
+```
 kubectl create secret generic tyk-conf --namespace=tyk \
    --from-literal=APISecret=CHANGEME \
    --from-literal=AdminSecret=12345 \
@@ -105,7 +107,9 @@ First, install Tyk control plane.
 Create secret with Tyk credentials:
 ```
 kubectl create namespace tyk-cp
+```
 
+```
 kubectl create secret generic tyk-cp-conf --namespace=tyk-cp \
    --from-literal=APISecret=CHANGEME \
    --from-literal=AdminSecret=12345 \
@@ -122,7 +126,7 @@ kubectl apply -f apps/tyk-control-plane.yaml
 You can expose the Tyk Dashboard to your localhost using the following command:
 
 ```
-kubectl port-forward svc/dashboard-svc-tyk-cp-tyk-dashboard --namespace tyk-cp 3001 &
+kubectl port-forward svc/dashboard-svc-tyk-cp-tyk-dashboard --namespace tyk-cp 3001:3000 &
 ```
 
 You can access Tyk Dashboard here:
@@ -137,7 +141,9 @@ Next, install the Tyk data plane.
 Create secret with remote control plane credentials:
 ```
 kubectl create namespace tyk-dp
+```
 
+```
 kubectl create secret generic tyk-dp-conf --namespace=tyk-dp \
    --from-literal=APISecret=CHANGEME \
    --from-literal=AdminSecret=12345 \
@@ -155,7 +161,7 @@ kubectl apply -f apps/tyk-data-plane.yaml
 You can expose the Data Plane Tyk Gateway to your localhost using the following command:
 
 ```
-kubectl port-forward svc/gateway-svc-tyk-gateway --namespace tyk 8081 &
+kubectl port-forward svc/gateway-svc-tyk-dp-tyk-gateway --namespace tyk-dp 8081:8080 &
 ```
 
 You can check the state of the Tyk gateway using the following `curl` command:
