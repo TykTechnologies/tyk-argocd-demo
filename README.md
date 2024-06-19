@@ -122,12 +122,12 @@ kubectl apply -f apps/tyk-control-plane.yaml
 You can expose the Tyk Dashboard to your localhost using the following command:
 
 ```
-kubectl port-forward svc/dashboard-svc-tyk-cp-tyk-dashboard --namespace tyk 3001:3000 &
+kubectl port-forward svc/dashboard-svc-tyk-cp-tyk-dashboard --namespace tyk 3000:3000 &
 ```
 
 You can access Tyk Dashboard here:
 ```
-http://localhost:3001
+http://localhost:3000
 ```
 
 Default admin login is "default@example.com" / "topsecretpassword". It can be changed in the ArgoCD app manifest.
@@ -153,12 +153,12 @@ kubectl apply -f apps/tyk-data-plane.yaml
 You can expose the Data Plane Tyk Gateway to your localhost using the following command:
 
 ```
-kubectl port-forward svc/gateway-svc-tyk-dp-tyk-gateway --namespace tyk 8081:8080 &
+kubectl port-forward svc/gateway-svc-tyk-dp-tyk-gateway --namespace tyk 8080:8080 &
 ```
 
 You can check the state of the Tyk gateway using the following `curl` command:
 ```
-curl localhost:8081/hello
+curl localhost:8080/hello
 ```
 
 ### Tyk Operator
