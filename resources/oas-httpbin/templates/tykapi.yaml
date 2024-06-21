@@ -1,0 +1,39 @@
+{{- $files := .Files }}
+{{ $serviceName := ( include "myapi.fullname" . )}}
+{{ $namespace := .Release.Namespace }}
+{{ $port := .Values.service.port | toString }}
+{{ $listenPath := .Values.tykapi.listenPath }}
+{{- range $path, $file := $files.Glob "apidefinitions/*.json" }}
+  {{ $basename := base $path }}
+  {{ $configMapKey := $basename | trimSuffix ".json" }}
+  {{ $content := $file | toString | nindent 4 }}
+  {{ $targetUrl := include "getServiceUrl" (dict "serviceName" $serviceName "namespace" $namespace "port" $port) }}
+  {{ $transformedContent := $content }}
+  {{ $transformedContent := include "replaceApiListenPath" (dict "apidef" $transformedContent "listenPath" $listenPath)}}
+  {{ $transformedContent := include "replaceApiTargetUrl" (dict "apidef" $transformedContent "targetUrl" $targetUrl)}}
+  {{ $tykapiname := printf "tykapi-%s" $configMapKey }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $tykapiname }}
+data:
+  {{ $configMapKey }}: |-
+    {{ $transformedContent }}
+---
+apiVersion: tyk.tyk.io/v1alpha1
+kind: TykOasApiDefinition
+metadata:
+  name: {{ $tykapiname }}
+spec:
+  {{- if $.Values.tykapi.operatorContext }}
+  contextRef:
+    name: {{ $.Values.tykapi.operatorContext.name }}
+    {{- if $.Values.tykapi.operatorContext.namespace }}
+    namespace: {{ $.Values.tykapi.operatorContext.namespace }}
+    {{- end }}  
+  {{- end }}
+  tykOAS:
+    configmapRef:
+      name: {{ $tykapiname }}
+      keyName: {{ $configMapKey }}
+{{- end }}
