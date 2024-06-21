@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oas-httpbin
+spec:
+  destination:
+    name: ''
+    namespace: ''
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: resources/oas-httpbin
+    repoURL: 'https://github.com/TykTechnologies/tyk-argocd-demo'
+    targetRevision: oas-apiops
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    syncOptions: []
