@@ -4,8 +4,7 @@ metadata:
   name: oas-httpbin
 spec:
   destination:
-    name: ''
-    namespace: ''
+    namespace: 'default'
     server: 'https://kubernetes.default.svc'
   source:
     path: resources/oas-httpbin
