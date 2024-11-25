@@ -139,7 +139,7 @@ data:
                   ]
                 },
                 "signingMethod": "rsa",
-                "source": "http://keycloak-service.tyk.svc:7000/realms/keycloak-oauth/protocol/openid-connect/certs"
+                "source": "aHR0cDovL2tleWNsb2FrLXNlcnZpY2UudHlrLnN2Yzo3MDAwL3JlYWxtcy9rZXljbG9hay1vYXV0aC9wcm90b2NvbC9vcGVuaWQtY29ubmVjdC9jZXJ0cw=="
               }
             }
           },
