@@ -33,20 +33,8 @@ curl -L --insecure -s -X POST 'http://localhost:7000/realms/keycloak-oauth/proto
    --data-urlencode 'password=topsecretpassword' | jq -r '.access_token'
 ```
 
-- Random user, does not give access even if it can generate a valid Keycloak JWT:
-```
-curl -L --insecure -s -X POST 'http://localhost:7000/realms/keycloak-oauth/protocol/openid-connect/token' \
-   -H 'Content-Type: application/x-www-form-urlencoded' \
-   --data-urlencode 'client_id=keycloak-oauth' \
-   --data-urlencode 'grant_type=password' \
-   --data-urlencode 'client_secret=NoTgoLZpbrr5QvbNDIRIvmZOhe9wI0r0' \
-   --data-urlencode 'scope=openid' \
-   --data-urlencode 'username=random@example.com' \
-   --data-urlencode 'password=topsecretpassword' | jq -r '.access_token'
-```
-
 You can access the httpbin Keycloak managed api using the following curl command:
 ```
-curl -L --insecure -s -X POST 'http://localhost:8080/keycloak/get' \
+curl -L --insecure -s 'http://localhost:8080/keycloak/get' \
    -H 'Authorization: $JWT'
 ```
