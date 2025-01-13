@@ -93,7 +93,7 @@ spec:
           fullnameOverride: tyk-dashboard
           dashboard:
             image:
-              tag: v5.6
+              tag: v5.7.1
             tykApiHost: http://gateway-svc-tyk-gateway.tyk.svc
             extraEnvs:
               - name: TYK_DB_SECURITY_ALLOWADMINRESETPASSWORD
@@ -116,7 +116,7 @@ spec:
           fullnameOverride: tyk-gateway
           gateway:
             image:
-              tag: v5.6
+              tag: v5.7.1
             useDashboardAppConfig:
               dashboardConnectionString: http://dashboard-svc-tyk-dashboard.tyk.svc:3000
               policyConnectionString: http://dashboard-svc-tyk-dashboard.tyk.svc:3000
